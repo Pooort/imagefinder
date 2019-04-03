@@ -70,6 +70,7 @@ async def get_data(low_file_paths):
             await page.goto('https://www.google.com/imghp', {
                 'timeout': 3000000
             })
+            logger.info('Page loaded: {}'.format(page.url))
             els = await page.xpath('//span[@class="S3Wjs"]')
             await els[0].click()
             await page.waitForXPath('//form[@method="GET"]/div/div/a')
