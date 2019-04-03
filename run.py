@@ -55,7 +55,7 @@ def selenium_get_data(low_file_paths):
     pass
 
 async def get_data(low_file_paths):
-    browser = await launch(headless=HEADLESS)
+    browser = await launch(headless=HEADLESS, args=['--no-sandbox'])
     page = await browser.newPage()
     await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.96 Safari/537.36')
     await page.evaluateOnNewDocument("() => {    Object.defineProperty(navigator, 'webdriver', {      get: () => false,    });  }")
