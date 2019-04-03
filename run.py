@@ -51,6 +51,9 @@ def download_images(images_data):
     bar.close()
 
 
+def selenium_get_data(low_file_paths):
+    pass
+
 async def get_data(low_file_paths):
     browser = await launch(headless=HEADLESS)
     page = await browser.newPage()
