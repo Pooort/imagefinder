@@ -64,7 +64,9 @@ async def get_data(low_file_paths):
     for low_file_path in low_file_paths:
         bar.update()
         try:
-            await page.goto('https://www.google.ru/imghp?hl=ru')
+            await page.goto('https://www.google.com/imghp', {
+                'timeout': 3000000
+            })
             els = await page.xpath('//span[@class="S3Wjs"]')
             await els[0].click()
             await page.waitForXPath('//form[@method="GET"]/div/div/a')
@@ -89,6 +91,7 @@ async def get_data(low_file_paths):
         except Exception as ex:
             logger.warning('Problem with {}: {}'.format(low_file_path, ex))
         sleep(2)
+    await browser.close()
     bar.close()
     return result
 
