@@ -1,2 +1,2 @@
-LOWIMAGESPATH=''
-HEADLESS=True
+LOWIMAGESPATH='/home/port/Загрузки/lowimages'
+HEADLESS=False
