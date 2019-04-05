@@ -12,6 +12,8 @@ def get_web_driver(headless=True):
         chop.add_argument('--disable-gpu')
         chop.add_argument('--window-size=1280x1696')
         chop.add_argument('--ignore-certificate-errors')
+        chop.add_argument('--no-sandbox')
+        chop.add_argument('--disable-dev-shm-usage')
 
 
     file_path = os.path.dirname(os.path.realpath(__file__))
