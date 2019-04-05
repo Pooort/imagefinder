@@ -39,10 +39,10 @@ logger = get_logger()
 
 
 def download_images(images_data):
-    bar = tqdm.tqdm(total=len(images_data))
-    bar.set_description(desc='Downloading images')
+    #bar = tqdm.tqdm(total=len(images_data))
+    #bar.set_description(desc='Downloading images')
     for file_path, image_hrefs in images_data.items():
-        bar.update()
+        #bar.update()
         for i, image_href in enumerate(image_hrefs):
             image_dir_path = os.path.join(LOWIMAGESPATH, os.path.basename(file_path).split('.')[0])
             if not os.path.exists(image_dir_path):
@@ -87,7 +87,7 @@ def selenium_get_data(low_file_paths):
                 full_image_href = a_element.get_attribute('href')
                 image_href= full_image_href.split('imgres?imgurl=', 1)[1].split('&imgrefurl=', 1)[0]
                 big_image_hrefs.append(image_href)
-            result[low_file_path] = big_image_hrefs
+            download_images({low_file_path: big_image_hrefs})
         except Exception as ex:
             print(ex)
             logger.warning('Problem with {}: {}'.format(low_file_path, ex))
