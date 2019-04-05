@@ -2,8 +2,10 @@ import os
 
 from selenium import webdriver
 
+from config import HEADLESS
 
-def get_web_driver(headless=True):
+
+def get_web_driver(headless=HEADLESS):
 
     chop = webdriver.ChromeOptions()
 
