@@ -47,7 +47,11 @@ def download_images(images_data):
             image_dir_path = os.path.join(LOWIMAGESPATH, os.path.basename(file_path).split('.')[0])
             if not os.path.exists(image_dir_path):
                 os.makedirs(image_dir_path)
-            file_extension = image_href.rsplit('.', 1)[1]
+            try:
+                file_extension = image_href.rsplit('.', 1)[1]
+            except Exception as ex:
+                print(ex)
+                logger.warn('Problem with href: {}'.format(image_href))
             filepath = os.path.join(image_dir_path, '{}.{}'.format(i, file_extension))
             try:
                 urllib.request.urlretrieve(image_href, filepath)
@@ -139,7 +143,7 @@ async def get_data(low_file_paths):
                 json_full_image_href = await full_image_href.jsonValue()
                 image_href = json_full_image_href.split('imgres?imgurl=', 1)[1].split('&imgrefurl=', 1)[0]
                 big_image_hrefs.append(image_href)
-            result[low_file_path] = big_image_hrefs
+            download_images({low_file_path: big_image_hrefs})
         except Exception as ex:
             print(ex)
             logger.warning('Problem with {}: {}'.format(low_file_path, ex))
@@ -157,7 +161,7 @@ low_file_paths = [os.path.join(LOWIMAGESPATH, f) for f in os.listdir(LOWIMAGESPA
 if low_file_paths:
     #images_data = asyncio.get_event_loop().run_until_complete(get_data(low_file_paths))
     images_data = selenium_get_data(low_file_paths)
-    download_images(images_data)
+    #download_images(images_data)
 
 end_time = datetime.datetime.now()
 logger.info('Script ended at {}'.format(end_time))
