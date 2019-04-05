@@ -57,7 +57,7 @@ def download_images(images_data):
                 urllib.request.urlretrieve(image_href, filepath)
             except:
                 logger.warning('Problem with downloading: {}'.format(image_href))
-    bar.close()
+    #bar.close()
 
 
 def selenium_get_data(low_file_paths):
