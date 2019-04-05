@@ -57,7 +57,7 @@ def download_images(images_data):
 
 
 def selenium_get_data(low_file_paths):
-    browser = get_web_driver(False)
+    browser = get_web_driver()
     result = {}
     bar = tqdm.tqdm(total=len(low_file_paths))
     bar.set_description(desc='Processing images')
