@@ -83,7 +83,12 @@ def selenium_get_data(low_file_paths):
             if not a_els:
                 a_els = div_el.find_elements_by_xpath('div/div[1]/div/div/div[2]/div[1]/div/a')
             big_image_hrefs = []
+            image_sizes = set()
             for a_element in a_els:
+                size = a_element.find_element_by_xpath('parent::*/parent::*/following-sibling::*/span/span').text
+                if size in image_sizes:
+                    continue
+                image_sizes.add(size)
                 full_image_href = a_element.get_attribute('href')
                 image_href= full_image_href.split('imgres?imgurl=', 1)[1].split('&imgrefurl=', 1)[0]
                 big_image_hrefs.append(image_href)
