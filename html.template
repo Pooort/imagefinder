@@ -1,0 +1,13 @@
+{% for folder in folders %}
+<h1>{{ folder }}</h1>
+{% for image in folders[folder]%}
+    <img src={{ image['src'] }}>
+    <br>
+    <a href={{ image['href'] }}>{{ image['href'] }}</a>
+    <br>
+    <br>
+{% endfor %}
+<br>
+<br>
+<br>
+{% endfor %}

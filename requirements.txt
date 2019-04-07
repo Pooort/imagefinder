@@ -1,3 +1,4 @@
 pyppeteer==0.0.25
 tqdm==4.31.1
 selenium==3.141.0
+Jinja2==2.10

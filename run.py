@@ -9,10 +9,11 @@ import tqdm
 from os.path import isfile, join
 
 from pyppeteer import launch
+from jinja2 import FileSystemLoader, Environment
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-from config import LOWIMAGESPATH, HEADLESS
+from config import LOWIMAGESPATH, HEADLESS, INFOFILE
 from helpers import get_web_driver
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -41,12 +42,15 @@ logger = get_logger()
 def download_images(images_data):
     #bar = tqdm.tqdm(total=len(images_data))
     #bar.set_description(desc='Downloading images')
+    downloaded_images_data = {}
     for file_path, image_hrefs in images_data.items():
         #bar.update()
+        image_dir_path = os.path.join(LOWIMAGESPATH, os.path.basename(file_path).split('.')[0])
+        image_dir = os.path.basename(image_dir_path)
+        downloaded_images_data[image_dir] = []
+        if not os.path.exists(image_dir_path):
+            os.makedirs(image_dir_path)
         for i, image_href in enumerate(image_hrefs):
-            image_dir_path = os.path.join(LOWIMAGESPATH, os.path.basename(file_path).split('.')[0])
-            if not os.path.exists(image_dir_path):
-                os.makedirs(image_dir_path)
             try:
                 file_extension = image_href.rsplit('.', 1)[1]
             except Exception as ex:
@@ -55,17 +59,20 @@ def download_images(images_data):
             filepath = os.path.join(image_dir_path, '{}.{}'.format(i, file_extension))
             try:
                 urllib.request.urlretrieve(image_href, filepath)
+                inner_image_data = {'src': filepath, 'href': image_href}
+                downloaded_images_data[image_dir].append(inner_image_data)
             except:
                 logger.warning('Problem with downloading: {}'.format(image_href))
+    return downloaded_images_data
     #bar.close()
 
 
 def selenium_get_data(low_file_paths):
     browser = get_web_driver()
-    result = {}
     bar = tqdm.tqdm(total=len(low_file_paths))
     bar.set_description(desc='Processing images')
     logger.info('Number of images to find: {}'.format(len(low_file_paths)))
+    downloaded_images_data = {}
     for low_file_path in low_file_paths:
         bar.update()
         try:
@@ -76,7 +83,11 @@ def selenium_get_data(low_file_paths):
             wait = WebDriverWait(browser, 10)
             wait.until(EC.element_to_be_clickable((By.XPATH, '//form[@method="GET"]/div/div/a'))).click()
             browser.find_element_by_xpath('//input[@id="qbfile"]').send_keys(low_file_path)
-            div_el = browser.find_element_by_xpath('//div[@class="normal-header not-first"]/following-sibling::*')
+            div_els = browser.find_elements_by_xpath('//div[@class="normal-header not-first"]/following-sibling::*')
+            if len(div_els) == 0:
+                continue
+            else:
+                div_el = div_els[0]
             a_els = div_el.find_elements_by_xpath('div/div/div/div/div[2]/div[1]/div/a')
             if not a_els:
                 a_els = div_el.find_elements_by_xpath('div/div/div/div[2]/div[1]/div/a')
@@ -92,14 +103,15 @@ def selenium_get_data(low_file_paths):
                 full_image_href = a_element.get_attribute('href')
                 image_href= full_image_href.split('imgres?imgurl=', 1)[1].split('&imgrefurl=', 1)[0]
                 big_image_hrefs.append(image_href)
-            download_images({low_file_path: big_image_hrefs})
+            download_image_data = download_images({low_file_path: big_image_hrefs})
+            downloaded_images_data.update(download_image_data)
         except Exception as ex:
             print(ex)
             logger.warning('Problem with {}: {}'.format(low_file_path, ex))
         sleep(2)
     browser.quit()
     bar.close()
-    return result
+    return downloaded_images_data
 
 
 async def get_data(low_file_paths):
@@ -158,15 +170,25 @@ async def get_data(low_file_paths):
     return result
 
 
-start_time = datetime.datetime.now()
-logger.info('Script started at {}'.format(start_time))
+def create_html(folders):
+    loader = FileSystemLoader(searchpath=os.path.dirname(os.path.realpath(__file__)))
+    env = Environment(loader=loader)
+    TEMPLATE_FILE = "html.template"
+    template = env.get_template(TEMPLATE_FILE)
+    output = template.render(folders=folders)
+    with open(INFOFILE, 'w') as infofile:
+        infofile.write(output)
+    return output
 
-low_file_paths = [os.path.join(LOWIMAGESPATH, f) for f in os.listdir(LOWIMAGESPATH) if isfile(join(LOWIMAGESPATH, f)) and not os.path.exists(os.path.join(LOWIMAGESPATH, f.split('.')[0]))]
+if __name__ == '__main__':
+    start_time = datetime.datetime.now()
+    logger.info('Script started at {}'.format(start_time))
 
-if low_file_paths:
-    #images_data = asyncio.get_event_loop().run_until_complete(get_data(low_file_paths))
-    images_data = selenium_get_data(low_file_paths)
-    #download_images(images_data)
+    low_file_paths = [os.path.join(LOWIMAGESPATH, f) for f in os.listdir(LOWIMAGESPATH) if isfile(join(LOWIMAGESPATH, f)) and not os.path.exists(os.path.join(LOWIMAGESPATH, f.split('.')[0]))]
 
-end_time = datetime.datetime.now()
-logger.info('Script ended at {}'.format(end_time))
+    if low_file_paths:
+        images_data = selenium_get_data(low_file_paths)
+        create_html(images_data)
+
+    end_time = datetime.datetime.now()
+    logger.info('Script ended at {}'.format(end_time))
