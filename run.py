@@ -61,7 +61,7 @@ def download_images(images_data):
             filepath = os.path.join(image_dir_path, filename)
             try:
                 urllib.request.urlretrieve(image_href, filepath)
-                inner_image_data = {'src': os.path.join(dir_name, filename), 'href': image_href}
+                inner_image_data = {'src': '{}'.format(os.path.join(dir_name, filename)), 'href': image_href}
                 downloaded_images_data[image_dir].append(inner_image_data)
             except:
                 logger.warning('Problem with downloading: {}'.format(image_href))
