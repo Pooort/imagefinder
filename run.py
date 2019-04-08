@@ -45,7 +45,8 @@ def download_images(images_data):
     downloaded_images_data = {}
     for file_path, image_hrefs in images_data.items():
         #bar.update()
-        image_dir_path = os.path.join(LOWIMAGESPATH, os.path.basename(file_path).split('.')[0])
+        dir_name = os.path.basename(file_path).split('.')[0]
+        image_dir_path = os.path.join(LOWIMAGESPATH, dir_name)
         image_dir = os.path.basename(image_dir_path)
         downloaded_images_data[image_dir] = []
         if not os.path.exists(image_dir_path):
@@ -56,10 +57,11 @@ def download_images(images_data):
             except Exception as ex:
                 print(ex)
                 logger.warn('Problem with href: {}'.format(image_href))
-            filepath = os.path.join(image_dir_path, '{}.{}'.format(i, file_extension))
+            filename = '{}.{}'.format(i, file_extension)
+            filepath = os.path.join(image_dir_path, filename)
             try:
                 urllib.request.urlretrieve(image_href, filepath)
-                inner_image_data = {'src': filepath, 'href': image_href}
+                inner_image_data = {'src': os.path.join(dir_name, filename), 'href': image_href}
                 downloaded_images_data[image_dir].append(inner_image_data)
             except:
                 logger.warning('Problem with downloading: {}'.format(image_href))
